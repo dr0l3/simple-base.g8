@@ -116,7 +116,6 @@ def baseproject(loc: String): Project =
     )
 
 lazy val server = baseproject("$name$")
-  .dependsOn(domain)
 
 lazy val all = (project in file("."))
-  .aggregate(server, domain)
+  .aggregate(server)
