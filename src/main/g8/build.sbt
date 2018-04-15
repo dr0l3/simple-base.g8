@@ -59,6 +59,7 @@ lazy val commonScalaFlags = Seq(
   "-language:experimental.macros", // Allow macro definition (besides implementation and application)
   "-language:higherKinds", // Allow higher-kinded types
   "-language:implicitConversions", // Allow definition of implicit functions called views
+  "-language:postfixOps, // Allow postfix ops
   "-unchecked", // Enable additional warnings where generated code depends on assumptions.
   "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
   "-Xfatal-warnings", // Fail the compilation if there are any warnings.
@@ -115,7 +116,7 @@ def baseproject(loc: String): Project =
       scalacOptions ++= commonScalaFlags
     )
 
-lazy val server = baseproject("$name$")
+lazy val server = baseproject("server")
 
 lazy val all = (project in file("."))
   .aggregate(server)
