@@ -1,6 +1,9 @@
 lazy val commonResolvers = Seq(
   resolvers += "twitter-repo" at "https://maven.twttr.com",
   resolvers += Resolver.bintrayRepo("twittercsl", "sbt-plugins/scrooge-sbt-plugin"),
+  resolvers += Resolver.url(
+    "scalameta",
+    url("http://dl.bintray.com/scalameta/maven"))(Resolver.ivyStylePatterns),
 
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
@@ -9,16 +12,15 @@ lazy val commonResolvers = Seq(
 )
 
 lazy val commonScalaVersion = Seq(
-  scalaOrganization := "org.typelevel",
-  scalaVersion := "2.12.4-bin-typelevel-4"
+  scalaVersion := "2.12.6"
 )
 
-lazy val twitterVersion = "17.12.0"
+lazy val twitterVersion = "18.6.0"
 lazy val catsVersion = "1.1.0"
 lazy val kittensVersion = "1.0.0-RC3"
 lazy val monocleVersion = "1.5.0"
 lazy val circeVersion = "0.9.1"
-lazy val Http4sVersion = "0.18.5"
+lazy val Http4sVersion = "0.18.15"
 lazy val doobieVersion = "0.5.2"
 
 
@@ -46,7 +48,9 @@ lazy val commonDeps = Seq(
     "org.http4s"      %% "http4s-dsl"          % Http4sVersion,
     "org.tpolecat" %% "doobie-core"     % doobieVersion,
     "org.tpolecat" %% "doobie-postgres" % doobieVersion,
-    "org.tpolecat" %% "doobie-specs2"   % doobieVersion
+    "org.tpolecat" %% "doobie-specs2"   % doobieVersion,
+    "com.beachape" %% "diesel-core" % "0.2.8",
+    "com.github.mpilquist" %% "simulacrum" % "0.13.0"
   )
 )
 
@@ -59,10 +63,10 @@ lazy val commonScalaFlags = Seq(
   "-language:experimental.macros", // Allow macro definition (besides implementation and application)
   "-language:higherKinds", // Allow higher-kinded types
   "-language:implicitConversions", // Allow definition of implicit functions called views
-  "-language:postfixOps, // Allow postfix ops
+  "-language:postfixOps", // Allow postfix ops
   "-unchecked", // Enable additional warnings where generated code depends on assumptions.
   "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
-  "-Xfatal-warnings", // Fail the compilation if there are any warnings.
+//  "-Xfatal-warnings", // Fail the compilation if there are any warnings.
   "-Xfuture", // Turn on future language features.
   "-Xlint:adapted-args", // Warn if an argument list is modified to match the receiver.
   "-Xlint:by-name-right-associative", // By-name parameter of right associative operator.
@@ -96,14 +100,7 @@ lazy val commonScalaFlags = Seq(
   "-Ywarn-unused:params", // Warn if a value parameter is unused.
   "-Ywarn-unused:patvars", // Warn if a variable bound in a pattern is unused.
   "-Ywarn-unused:privates", // Warn if a private member is unused.
-  "-Ywarn-value-discard", // Warn when non-Unit expression results are unused.
-
-  //typelevel
-  "-Yinduction-heuristics", // speeds up the compilation of inductive implicit resolution
-  "-Ykind-polymorphism", // type and method definitions with type parameters of arbitrary kinds
-  "-Yliteral-types", // literals can appear in type position
-  "-Xstrict-patmat-analysis", // more accurate reporting of failures of match exhaustivity
-  "-Xlint:strict-unsealed-patmat" // warn on inexhaustive matches against unsealed traits
+  "-Ywarn-value-discard" // Warn when non-Unit expression results are unused.
 )
 
 def baseproject(loc: String): Project =
@@ -113,7 +110,11 @@ def baseproject(loc: String): Project =
       commonResolvers,
       commonScalaVersion,
       commonDeps,
-      scalacOptions ++= commonScalaFlags
+      scalacOptions ++= commonScalaFlags,
+      addCompilerPlugin("org.scalameta" % "paradise" % "3.0.0-M11" cross CrossVersion.full),
+      addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary),
+      scalacOptions += "-Xplugin-require:macroparadise",
+      scalacOptions in (Compile, console) := Seq()
     )
 
 lazy val server = baseproject("server")
